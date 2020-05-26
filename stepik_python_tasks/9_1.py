@@ -2,7 +2,6 @@ import collections
 from random import choice
 
 Card = collections.namedtuple('card', ['rank', 'suit'])
-print(Card)
 
 
 class FrenchDeck:
@@ -21,13 +20,29 @@ class FrenchDeck:
 
 
 deck = FrenchDeck()
-print(len(deck))
-print(deck[0])
-print(deck[-1])
-beer_card = Card('7', 'diamonds')
-print(beer_card)
-
+# print(len(deck))
+# print(deck[0])
+# beer_card = Card('7', 'diamonds')
+# print(beer_card)
 # print(choice(deck))
-print(deck[:5])
-for card in deck:  # doctest: +ELLIPSIS
+# print(deck[:5])
+# print(deck[12::13])
+
+suit_values = dict(spades=3, hearts=2, diamonds=1, clubs=0)
+
+
+def spades_high(card):
+    rank_value = FrenchDeck.ranks.index(card.rank)
+    print(suit_values[card.suit], end='\n\n\n')
     print(card)
+    print(rank_value)
+    print(len(suit_values))
+    return rank_value * len(suit_values) + suit_values[card.suit]
+
+
+for card in sorted(deck, key=spades_high):
+    rank_value = FrenchDeck.ranks.index(card.rank)
+    print(card)
+    print(rank_value)
+    print(len(suit_values))
+    print(suit_values[card.suit], end='\n\n\n')

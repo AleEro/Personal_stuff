@@ -6,26 +6,17 @@ from openpyxl import load_workbook
 
 xlsx = r'C:\Users\Z510\Downloads\Текущий прогресс.xlsx'
 
-# # - pandas
-# csv = r'C:\Users\Z510\Downloads\Текущий прогресс - Лист1.csv'
-# dc = pd.read_csv(csv, encoding='utf8')
-#
-# xlsx = r'C:\Users\Z510\Downloads\Текущий прогресс.xlsx'
-# dx = pd.read_excel(xlsx, encoding='utf8')
-#
-# print(dc)
-# print(dx)
-# # - -
-
-
 # - openpyxl
 wb = load_workbook(filename=xlsx)
 ws = wb.active
 # data = ws.values
 
 # все это полная ъуета
-# нужно пределывать
-# попробовать через панду
+# todo: добавить http запрос на стим и диск
+# todo: добавить столбец в таблицу:
+#     имя - updates_autodetect
+#     если есть - перезаписывать
+
 
 def First_column_parser(matchstr):
     # print(matchstr)

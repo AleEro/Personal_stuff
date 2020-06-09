@@ -1,3 +1,14 @@
+"""
+    input = 9119
+    each element is powered by 2
+    mean 9^2 = 81
+         1^2 = 1
+    and so on
+    result int 811181
+
+"""
+
+
 def assert_equals(a, b):
     if a == b:
         print('correct')

@@ -33,16 +33,17 @@ suit_values = dict(spades=3, hearts=2, diamonds=1, clubs=0)
 
 def spades_high(card):
     rank_value = FrenchDeck.ranks.index(card.rank)
-    print(suit_values[card.suit], end='\n\n\n')
-    print(card)
-    print(rank_value)
-    print(len(suit_values))
+    print('card', card)
+    print('rank_value', rank_value)
+    print('suit_values', len(suit_values))
+    print('suit_values[card.suit]', suit_values[card.suit], end='\n\n\n')
     return rank_value * len(suit_values) + suit_values[card.suit]
 
 
 for card in sorted(deck, key=spades_high):
     rank_value = FrenchDeck.ranks.index(card.rank)
-    print(card)
-    print(rank_value)
-    print(len(suit_values))
-    print(suit_values[card.suit], end='\n\n\n')
+    print('- '*10)
+    print('card', card)
+    print('rank_value', rank_value)
+    print('suit_values', len(suit_values))
+    print('suit_values[card.suit]', suit_values[card.suit], end='\n\n\n')

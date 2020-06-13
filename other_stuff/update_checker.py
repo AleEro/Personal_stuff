@@ -1,7 +1,7 @@
 # import csv
 import re
 # import pandas as pd
-import http
+import requests
 from openpyxl import load_workbook
 
 xlsx = r'C:\Users\Z510\Downloads\Текущий прогресс.xlsx'
@@ -11,6 +11,28 @@ wb = load_workbook(filename=xlsx)
 ws = wb.active
 # data = ws.values
 
+
+def get_http(url):
+    return requests.get(url)
+
+
+def parse_http(http):
+    pass
+
+
+def first_column_parser(matchstr):
+    # - future features
+    # # print(matchstr)
+    # # if 'steam'in matchstr:
+    # rawstr = r'"([^",]*)"'  # raw string for steam services
+    # # else:
+    # #     rawstr = r'([\w ]*)'
+    # match_obj = re.search(rawstr, matchstr)
+    # - -
+
+    match_obj = re.search(r'"([^",]*)"', matchstr)  # raw string for steam services
+    return match_obj.group(1)
+
 # все это полная ъуета
 # todo: добавить http запрос на стим и диск
 # todo: добавить столбец в таблицу:
@@ -18,40 +40,38 @@ ws = wb.active
 #     если есть - перезаписывать
 
 
-def First_column_parser(matchstr):
-    # print(matchstr)
-    # if 'steam'in matchstr:
-    rawstr = r'"([^",]*)"' # rawstr for steam services
-    # else:
-    #     rawstr = r'([\w ]*)'
-    match_obj = re.search(rawstr, matchstr)
-    return match_obj
-
-
 # Print row per row
 for cellObj in ws:
     for cells in cellObj:
         if cells.value is None:
-            pass
+            continue
         else:
             if 'A' in cells.coordinate and 'steam' in cells.value:
-                print(cells.coordinate.split())
-                print(First_column_parser(cells.value))
+
+                print(get_http(first_column_parser(cells.value)), cells.coordinate.split())
+                # print(first_column_parser(cells.value), cells.coordinate.split())
+
+# add new column
+ws.insert_cols(2)
+# изменить имя колонки
+# ws.insert_cols(2)
+
+# # print all in worksheet (ws)
+for cellObj in ws:
+    for cells in cellObj:
+        print(cells.value, end=' ')
+        print(cells.coordinate, end=' / ')
+    print('-- END --')
+
 # - -
 
-
-
+# import re
 #
-# rawstr = r""""(.*)","(.*)""""
-# embedded_rawstr = r""""(.*)","(.*)""""
-# matchstr = """
-# A74 =HYPERLINK("https://steamcommunity.com/sharedfiles/filedetails/?id=1442128058","Intelligence and Espionage")
-# "Название"
-# A75 =HYPERLINK("https://steamcommunity.com/sharedfiles/filedetails/?id=924990631","Ultimate Technologies")
-# A76 =HYPERLINK("https://steamcommunity.com/sharedfiles/filedetails/?id=1711098117","PJs :: Better Megastructures")
-# A77 =HYPERLINK("https://steamcommunity.com/sharedfiles/filedetails/?id=1603330813","Ecology Mod")
-# A78 =HYPERLINK("https://steamcommunity.com/sharedfiles/filedetails/?id=1771786608","AlphaMod")
-# """
+# # common variables
+#
+# rawstr = r"""<div class="detailsStatsContainerRight"><div class="detailsStatRight">.*</div><div class="detailsStatRight">.*</div><div class="detailsStatRight">(.*)</div></div>"""
+# embedded_rawstr = r"""<div class="detailsStatsContainerRight"><div class="detailsStatRight">.*</div><div class="detailsStatRight">.*</div><div class="detailsStatRight">(.*)</div></div>"""
+# matchstr = """<div class="detailsStatsContainerRight"><div class="detailsStatRight">120.814 MB</div><div class="detailsStatRight">1 мар. 2018 в 17:14</div><div class="detailsStatRight">23 июл. 2019 в 15:48</div></div>"""
 #
 # # method 1: using a compile object
 # compile_obj = re.compile(rawstr)
@@ -68,5 +88,4 @@ for cellObj in ws:
 #
 # # Retrieve group(s) by index
 # group_1 = match_obj.group(1)
-# group_2 = match_obj.group(2)
-
+#

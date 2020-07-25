@@ -12,22 +12,20 @@ ws = wb.active
 # data = ws.values
 
 
-def get_http(url):
-    return requests.get(url)
-
-
-def parse_http(http):
-    pass
+def update_date(url):
+    http_page = requests.get(url)
+    rawstr = r"""<div class="detailsStatsContainerRight"><div class="detailsStatRight">.*</div><div class="detailsStatRight">.*</div><div class="detailsStatRight">(.*)</div></div>"""
 
 
 def first_column_parser(matchstr):
     # - future features
-    # # print(matchstr)
-    # # if 'steam'in matchstr:
-    # rawstr = r'"([^",]*)"'  # raw string for steam services
-    # # else:
-    # #     rawstr = r'([\w ]*)'
+    # print(matchstr)
+    # if 'steam'in matchstr:
+    #     rawstr = r'"([^",]*)"'  # raw string for steam services
+    # else:
+    #     rawstr = r'([\w ]*)'
     # match_obj = re.search(rawstr, matchstr)
+    # return    match_obj.group(1)
     # - -
 
     match_obj = re.search(r'"([^",]*)"', matchstr)  # raw string for steam services
@@ -47,8 +45,7 @@ for cellObj in ws:
             continue
         else:
             if 'A' in cells.coordinate and 'steam' in cells.value:
-
-                print(get_http(first_column_parser(cells.value)), cells.coordinate.split())
+                update_date(first_column_parser(cells.value), cells.coordinate.split())
                 # print(first_column_parser(cells.value), cells.coordinate.split())
 
 # add new column
@@ -64,6 +61,7 @@ for cellObj in ws:
     print('-- END --')
 
 # - -
+
 
 # import re
 #

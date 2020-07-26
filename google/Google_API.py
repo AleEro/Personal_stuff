@@ -3,97 +3,25 @@ import googleapiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
 from pprint import pprint
 
-# # авторизация
-CREDENTIALS_FILE = r'google_key\gosheetsapi-bdc92f985a74.json'  # имя файла с закрытым ключом
-
-credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
-                                                               ['https://www.googleapis.com/auth/spreadsheets',
-                                                                'https://www.googleapis.com/auth/drive'])
-
-httpAuth = credentials.authorize(httplib2.Http())
-
-
-# results = service.spreadsheets().batchUpdate(spreadsheetId = spreadsheet['spreadsheetId'], body = {
-#   "requests": [
-#
-#     # Задать ширину столбца A: 317 пикселей
-#     {
-#       "updateDimensionProperties": {
-#         "range": {
-#           "sheetId": 0,
-#           "dimension": "COLUMNS",  # COLUMNS - потому что столбец
-#           "startIndex": 0,         # Столбцы нумеруются с нуля
-#           "endIndex": 1            # startIndex берётся включительно, endIndex - НЕ включительно,
-#                                    # т.е. размер будет применён к столбцам в диапазоне [0,1), т.е. только к столбцу A
-#         },
-#         "properties": {
-#           "pixelSize": 317     # размер в пикселях
-#         },
-#         "fields": "pixelSize"  # нужно задать только pixelSize и не трогать другие параметры столбца
-#       }
-#     },
-#
-#     # Задать ширину столбца B: 200 пикселей
-#     {
-#       "updateDimensionProperties": {
-#         "range": {
-#           "sheetId": 0,
-#           "dimension": "COLUMNS",
-#           "startIndex": 1,
-#           "endIndex": 2
-#         },
-#         "properties": {
-#           "pixelSize": 200
-#         },
-#         "fields": "pixelSize"
-#       }
-#     },
-#
-#     # Задать ширину столбцов C и D: 165 пикселей
-#     {
-#       "updateDimensionProperties": {
-#         "range": {
-#           "sheetId": 0,
-#           "dimension": "COLUMNS",
-#           "startIndex": 2,
-#           "endIndex": 4
-#         },
-#         "properties": {
-#           "pixelSize": 165
-#         },
-#         "fields": "pixelSize"
-#       }
-#     },
-#
-#     # Задать ширину столбца E: 100 пикселей
-#     {
-#       "updateDimensionProperties": {
-#         "range": {
-#           "sheetId": 0,
-#           "dimension": "COLUMNS",
-#           "startIndex": 4,
-#           "endIndex": 5
-#         },
-#         "properties": {
-#           "pixelSize": 100
-#         },
-#         "fields": "pixelSize"
-#       }
-#     }
-#   ]
-# }).execute()
-
 
 class Spreadsheet:
     def __init__(self):
+        # # авторизация
+        CREDENTIALS_FILE = r'google_key\gosheetsapi-bdc92f985a74.json'  # имя файла с закрытым ключом
+
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
+                                                                       ['https://www.googleapis.com/auth/spreadsheets',
+                                                                        'https://www.googleapis.com/auth/drive'])
+
+        self.httpAuth = credentials.authorize(httplib2.Http())
         self.sheetId = 0
         self.requests = []
-        # self.sheetTitle = '0'
-        self.service = googleapiclient.discovery.build('sheets', 'v4', http=httpAuth)
+        self.service = googleapiclient.discovery.build('sheets', 'v4', http=self.httpAuth)
         self.valueRanges = []
         self.spreadsheet = None
         self.spreadsheetId = None
         self.sheetTitle = None
+        self.table_values = None
 
     def create_table(self, spreadsheet_title='Сие есть название документа', sheet_title='Сие есть название листа'):
         self.spreadsheet = self.service.spreadsheets().create(
@@ -137,11 +65,19 @@ class Spreadsheet:
         self.sheetTitle = self.spreadsheet['sheets'][0]['properties']['title']
         # pprint(self.spreadsheet)
 
-    def get_data(self, table_id=None, tb_min=None, tb_max=None):
+    def get_values(self, table_id=None, tb_min=None, tb_max=None):
+        """
+        get the table values in range from tb_min to tb_max
+        :param str table_id:
+        :param int tb_min:
+        :param int tb_max:
+        :return:
+        """
+
         if table_id is None:
             results = self.service.spreadsheets().values().get(spreadsheetId=self.spreadsheet['spreadsheetId'],
-                                                               range=f'{self.sheetTitle}!A1:E8').execute()
-            values = results.get('values', [])
+                                                               range=f'{self.sheetTitle}!A1:E8'
+                                                               ).execute()
         else:
             self.get_table(table_id)
             results = self.service.spreadsheets().values().get(spreadsheetId=table_id,
@@ -149,20 +85,22 @@ class Spreadsheet:
                                                                dateTimeRenderOption='FORMATTED_STRING',
                                                                valueRenderOption='FORMULA'
                                                                ).execute()
-            values = results.get('values', [])
-        pprint(values)
+        self.table_values = results.get('values', [])
+        return self.table_values
 
     def give_access(self, role='writer', email_address='paradox.wolf95@gmail.com'):
-        # предоставление доступа к таблице
-        googleapiclient.discovery.build('drive', 'v3', http=httpAuth).permissions().create(
+        """
+            access to read / write
+            :param role: reader / writer
+            :param email_address: now it's paradox.wolf95@gmail.com
+            :return:
+        """
+        googleapiclient.discovery.build('drive', 'v3', http=self.httpAuth).permissions().create(
             fileId=self.spreadsheet['spreadsheetId'],
             body={'type': 'user',
                   'role': f'{role}',
                   'emailAddress': f'{email_address}'},
             fields='id').execute()
-
-        # доступ на чтение(reader) /запись(writer)
-        # в данном случае это paradox.wolf95@gmail.com
 
     def prepare_setDimensionPixelSize(self, dimension, startIndex, endIndex, pixelSize):
         self.requests.append({"updateDimensionProperties": {"range": {"sheetId": self.sheetId,
@@ -172,6 +110,27 @@ class Spreadsheet:
                                                             "properties": {"pixelSize": pixelSize},
                                                             "fields": "pixelSize"}})
 
+    def insert_dimension(self, startIndex, endIndex, sheetId=None, dimension="COLUMNS", inheritFromBefore=True):
+        """
+            Add row or column
+            :param str sheetId: id of sheet in spreadsheet
+            :param str dimension: "ROWS" or "COLUMNS"
+            :param int startIndex: from 0 to any
+            :param int endIndex: from 0 to any but(-1)
+            :param bool inheritFromBefore: make new cell same as previous cell
+            :return:
+        """
+
+        if sheetId is None:
+            sheetId = self.sheetId
+
+        self.requests.append({"insertDimension": {"range": {"sheetId": sheetId,
+                                                            "dimension": dimension,
+                                                            "startIndex": startIndex,
+                                                            "endIndex": endIndex
+                                                            },
+                                                  "inheritFromBefore": inheritFromBefore}})
+
     def prepare_setColumnsWidth(self, startCol, endCol, width):
         self.prepare_setDimensionPixelSize("COLUMNS", startCol, endCol + 1, width)
 
@@ -180,9 +139,14 @@ class Spreadsheet:
 
     def prepare_setValues(self, cellsRange, values, majorDimension="ROWS"):
         self.valueRanges.append(
-            {"range": self.sheetTitle + "!" + cellsRange, "majorDimension": majorDimension, "values": values})
+            {"range": self.sheetTitle + "!" + cellsRange,
+             "majorDimension": majorDimension,
+             "values": values})
 
-        # spreadsheets.batchUpdate and spreadsheets.values.batchUpdate
+    def prepare_setValue(self, cell, value):
+        self.prepare_setValues(cellsRange=f'{cell}',
+                               majorDimension="COLUMNS",
+                               values=value)
 
     def runPrepared(self, value_input_option="USER_ENTERED"):
         upd1_res = {'replies': []}
@@ -200,26 +164,4 @@ class Spreadsheet:
         finally:
             self.requests = []
             self.valueRanges = []
-        try:
-            self.get_data()
-        finally:
-            pass
         return upd1_res['replies'], upd2_res['responses']
-
-
-# ss - экземпляр нашего класса Spreadsheet
-ss = Spreadsheet()
-# ss.create_table()
-#  https://docs.google.com/spreadsheets/d/1iGcBdQN-Vbr0ZKjrHJ-WlMvdwWesxg1FgSCW7Jh6KZE/edit?usp=sharing
-# ss.get_table('1iGcBdQN-Vbr0ZKjrHJ-WlMvdwWesxg1FgSCW7Jh6KZE')
-ss.get_data('1iGcBdQN-Vbr0ZKjrHJ-WlMvdwWesxg1FgSCW7Jh6KZE', tb_max=6,tb_min=16)
-ss.get_data('1iGcBdQN-Vbr0ZKjrHJ-WlMvdwWesxg1FgSCW7Jh6KZE', tb_max=23,tb_min=57)
-ss.get_data('1iGcBdQN-Vbr0ZKjrHJ-WlMvdwWesxg1FgSCW7Jh6KZE', tb_max=71,tb_min=76)
-# ss.give_access()
-# ss.prepare_setColumnWidth(0, 317)
-# ss.prepare_setColumnWidth(1, 200)
-# ss.prepare_setColumnsWidth(2, 3, 165)
-# ss.prepare_setColumnWidth(4, 100)
-# ss.prepare_setValues("B2:C3", [["This is B2", "This is C2"], ["This is B3", "This is C3"]])
-# ss.prepare_setValues("D5:E6", [["This is D5", "This is D6"], ["This is E5", "=5+5"]], "COLUMNS")
-# ss.runPrepared()

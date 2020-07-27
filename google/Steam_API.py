@@ -1,11 +1,10 @@
 import json
-import requests
 from steam.webapi import WebAPI
 
 from time import ctime
 
 CREDENTIALS_FILE = r'steam_key\steam_key.json'
-# to use this const u should register your's steam key
+# to use this const you should register your's steam key
 
 with open(CREDENTIALS_FILE, mode='r', encoding='utf-8') as file:
     file = file.read()

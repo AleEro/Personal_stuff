@@ -1,7 +1,6 @@
 import httplib2
 import googleapiclient.discovery
 from oauth2client.service_account import ServiceAccountCredentials
-from pprint import pprint
 
 
 class Spreadsheet:
@@ -145,8 +144,11 @@ class Spreadsheet:
 
     def prepare_setValue(self, cell, value):
         self.prepare_setValues(cellsRange=f'{cell}',
-                               majorDimension="COLUMNS",
+                               majorDimension="ROWS",
                                values=value)
+
+    def set_color(self, cell, hex_color):
+        pass
 
     def runPrepared(self, value_input_option="USER_ENTERED"):
         upd1_res = {'replies': []}

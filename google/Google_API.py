@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 class Spreadsheet:
     def __init__(self):
         # # авторизация
-        CREDENTIALS_FILE = r'google_key\gosheetsapi-bdc92f985a74.json'  # имя файла с закрытым ключом
+        CREDENTIALS_FILE = r'gosheetsapi-785538c330cd.json'  # имя файла с закрытым ключом
 
         credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE,
                                                                        ['https://www.googleapis.com/auth/spreadsheets',

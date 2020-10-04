@@ -62,7 +62,6 @@ class Spreadsheet:
         self.spreadsheet = self.service.spreadsheets().get(spreadsheetId=table_id).execute()
         self.spreadsheetId = self.spreadsheet['spreadsheetId']
         self.sheetTitle = self.spreadsheet['sheets'][0]['properties']['title']
-        # pprint(self.spreadsheet)
 
     def get_values(self, table_id=None, tb_min=None, tb_max=None):
         """

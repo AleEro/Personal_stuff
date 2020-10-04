@@ -24,5 +24,6 @@ def test_get_values():
                 ss.prepare_setValue(f'C{counter}', [['ERROR']])
     ss.runPrepared()
 
+
 if __name__ == '__main__':
     test_get_values()

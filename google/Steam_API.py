@@ -4,7 +4,12 @@ from steam.webapi import WebAPI
 from time import ctime
 
 CREDENTIALS_FILE = r'steam_key.json'
-# to use this const you should register yours steam key
+# to use this const you should register yours steam key and transfer it to a json
+# {
+#   "domain" : "your domain"
+#   "key" : ""
+# }
+
 
 with open(CREDENTIALS_FILE, mode='r', encoding='utf-8') as file:
     file = file.read()
